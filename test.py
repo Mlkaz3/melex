@@ -18,8 +18,6 @@ import wikt_token_en_split_extracting as wikt_extract
 # 
 # wikt_extract.mw_system(4)
 
-
-
 # import wikt_token_json_extracting as wt
 # wt.extracting_norm_mw_directory()
 
