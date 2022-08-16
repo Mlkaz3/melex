@@ -41,26 +41,41 @@ def wordnet_retrieve_data(token, remarks="testing on WN insertion -1"):
             tags.append("ADV")
     
     if len(tags)==0 and len(possible_synsets)==0 and len(possible_definition)==0 and len(possible_examples)==0 and len(synonyms)==0 and len(antonyms)==0:
+        
+        
         # insert into OOV table 
         # check condition before inserting too 
-        if db_con.check_oov(token)==0:
-            db_con.insert_single_oov(token, remark=remarks)
+
+        # before inserting into oov, check if this word exist in melex before 
+        # if yes, then there is no need to insert into oov 
+        if db_con.check_token(token)==0: # not a token before, might be oov 
+            if db_con.check_oov(token)==0: # not a recorded oov before 
+                db_con.insert_single_oov(token, remark=remarks)
+            else: 
+                print("duplicated OOV found")
         else: 
-            print("UNDONE - INSERT INTO OOV DUPLICATED")
-            
-        # but what if this word is registered into melex token table? 
-        if db_con.check_token(token)==1:
-            print("some weird thing happen hehe :)")
+            # as a token before, 100% not oov 
+            # dont add into oov 
+            print("not oov although not identified in wordnet")
+
+        # # but what if this word is registered into melex token table? 
+        # if db_con.check_token(token)==1:
+        #     print("some weird thing happen hehe :)")
             
         return "OOV"
+
     else: 
+
+        # the word is not oov in wordnet
+
         context_list_of_dict = []
         # check token exist before or not 
         # condition 4: https://docs.google.com/spreadsheets/d/1hzpRjnvbDRuu0NI0NDP-nm-F1iJIJATXfnKOqaPusaw/edit#gid=1882015912 
         # check from melex 
         if db_con.check_token(token)==0:
-            #token does not exist in melex 
+            # token does not exist in melex 
             # prepare multiple context possibility 
+            # insert into token table 
             
             contexts_available = len(tags)
             count=0
@@ -85,6 +100,14 @@ def wordnet_retrieve_data(token, remarks="testing on WN insertion -1"):
                     context_list_of_dict.append(single_context)
 
                 db_con.insert_wndata(token,context_list_of_dict)
+            
+                # after insertion, check if ths word exist in oov, yes then remove 
+                # check if the word exist in oov, if yes remove 
+                oov_existence = db_con.check_oov(token)
+                if oov_existence!=0:
+                    # remove it as oov cause it is find it somewhere in other lexicon source 
+                    db_con.remove_non_oov(token)
+
         else:
             # condition 1
             # token exist in melex
@@ -120,8 +143,8 @@ def wordnet_retrieve_data(token, remarks="testing on WN insertion -1"):
                     db_con.update_context_WN(db_con.mongo_token(), token, single_context)
                     count+=1
                 
-            else:
-                db_con.insert_melex_dup_term(token, "duplicate during WN extraction")
+            # else:
+            #     db_con.insert_melex_dup_term(token, "duplicate during WN extraction")
 
         return "TOKEN",context_list_of_dict
 

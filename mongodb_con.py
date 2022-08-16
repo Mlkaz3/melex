@@ -124,6 +124,11 @@ def remove_all_tokenrecords(collection=mongo_token()):
         if val=="token":
             collection.delete_many({})
 
+def remove_non_oov(token,collection=mongo_oov()):
+    # remove what is not oov but identified as oov 
+    myQuery ={'token':token}
+    collection.delete_one(myQuery)
+
 def read_all(collection):
     data = collection.find()
     return data

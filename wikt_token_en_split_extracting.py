@@ -130,6 +130,14 @@ def extracting_norm_mw_single(clean_word):
    
     # inserting into db 
     db_con.insert_mwdata_multiple_contexts(token_str, context_list_of_dict, remarks="inserting 1 json testing/debugging stage - wyxl")
+
+
+    # check if the word exist in oov, if yes remove 
+    oov_existence = db_con.check_oov(token_str)
+    if oov_existence!=0: 
+        # remove it as oov cause it is find it somewhere
+        db_con.remove_non_oov(token_str)
+    
     print("DONE")
 
 
@@ -252,6 +260,10 @@ def extracting_norm_mw_context(clean_word):
 
 # pass in en file number 
 # such as en_0.csv, pass in en_file_no = 0
+# some logic for token and oov (consider about possible scenarios)
+# if token table got the insert into token, if second source then add context only 
+# if oov table got, but the word metadata exist in lexicon source, remove from oov and add into token
+# if token table got, but other lexicon source show None, stick back to the token table, not classify as OOV
 def mw_system(en_file_no=1):
     df = pd.read_csv('wikt_token_en_split/en_'+ str(en_file_no) +'.csv')
     en_list = df.text.tolist()
@@ -260,11 +272,12 @@ def mw_system(en_file_no=1):
         for i in en_list:
             count+=1
             print(count, ' ->', i)
-            #check from melex 
+
+            # check from oov? 
+
+            # check from melex 
             if db_con.check_token(i)==1:
-                #if token exist in melex 
-                db_con.insert_melex_dup_term(i, remark="test run on first wikt file")
-            
+                # token exist in melex
                 # check whether MW exist 
                 # check any source of "wn" inside context
                 wn_source_check = db_con.mongo_token().find({"token":i, "contexts.word_source": "MW" })
@@ -277,45 +290,45 @@ def mw_system(en_file_no=1):
                     data = req.json()
 
                     if(type(data[0]) is dict):
-                        with open(f'{search_term}.json', 'w') as f:
+                        with open(save_path + '/'+ search_term+ '.json', 'w') as f:
                             json.dump(data, f)
+                        # with open(f'{search_term}.json', 'w') as f:
+                        #     json.dump(data, f)
                         extracting_norm_mw_context(data)
                         print('Yes' )
                         print("debug n validating ->", i)
                     else:
-                        print('No-' + i)
-                    
-                    
+                        print('Not found in merriam webster -' + i)
+                
                 else: 
-                    print("duplication")
+                    # the word of crawled from merriam webster somehow repeated
+                    print("debug - warning - duplication") 
      
             else:
                 # token does not exist in melex 
-                # or token exist in melex with other lexicon source 
-                # check lexicalized status using api key
-                # SOON: proposing a better method to not waste api key
+                # add a new record/row into the table
+
                 search_term = i
                 req = requests.get(f"https://www.dictionaryapi.com/api/v3/references/collegiate/json/{search_term}?key={api_key}")
                 data = req.json()
                 if len(data)==0:
-                    db_con.insert_api_not_found_term(i, remark="test run on first wikt file")
-                        # add into oov database
+                    # nothing return from api
+                    # it might due to nothing found 
                     db_con.insert_single_oov(i, remark="test run on first wikt file")
+
                 elif(type(data[0]) is dict):
+                    # there is something return from the MW API
                     db_con.insert_api_found_term(i, remark = "test run on first wikt file")
                     with open(save_path + '/'+ search_term+ '.json', 'w') as f:
                         json.dump(data, f)
                         
-                    # here do teh single token insertion yo 
+                    # here do the single token insertion
                     extracting_norm_mw_single(data)
                     print("debug n validating ->", i)
 
                 else:
-                    db_con.insert_api_not_found_term(i, remark="test run on first wikt file")
                     db_con.insert_single_oov(i, remark="test run on first wikt file")
-                
-            
-               
+                     
     print("COMPLETED")
 
 
