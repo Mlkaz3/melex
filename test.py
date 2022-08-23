@@ -15,12 +15,11 @@ import wikt_token_en_split_extracting as wikt_extract
 # db_con.remove_all_oovrecords()
 
 # stop here on 16th ogos, stop at 4, continue at 5 
-# continue on 18th ogos, stop at 10, continue 11
-# wikt_extract.mw_system(10)
+# continue on 18th ogos, stop at 11, continue 12
+# fail to run 11 
+wikt_extract.mw_system(11)
 # for i in range(5,6):
 #     wikt_extract.mw_system(i)
-
-
 
 # import wikt_token_json_extracting as wt
 # wt.extracting_norm_mw_directory()
@@ -30,7 +29,6 @@ import wikt_token_en_split_extracting as wikt_extract
 # for i in range(3,11):
 #     print(i)
 #     x = we.wn_system(i)
-
 
 # x = we.wn_system(2)
 
