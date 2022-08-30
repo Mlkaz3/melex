@@ -16,8 +16,9 @@ import wikt_token_en_split_extracting as wikt_extract
 
 # stop here on 16th ogos, stop at 4, continue at 5 
 # continue on 18th ogos, stop at 11, continue 12
-# fail to run 11 
-wikt_extract.mw_system(11)
+# continue on 23th ogos, stop at 13, continue 14
+# continue on 29th ogos, stop at 15, continue 16
+# wikt_extract.mw_system(15)
 # for i in range(5,6):
 #     wikt_extract.mw_system(i)
 
