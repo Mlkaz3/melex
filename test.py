@@ -20,7 +20,9 @@ import wikt_token_en_split_extracting as wikt_extract
 # continue on 29th ogos, stop at 15, continue 16
 # continue on 5th sep, stop at 17, continue 18
 # continue on 6th sep, stop at 19, continue 20
-# wikt_extract.mw_system(19)
+# continue on 9th sep, stop at 21, continue 22
+# continue on 12th sep, stop at 23, continue 24
+# wikt_extract.mw_system(23)
 # for i in range(5,6):
 #     wikt_extract.mw_system(i)
 
