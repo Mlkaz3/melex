@@ -160,3 +160,6 @@ def wn_system(number=1):
     output_list = list(map(wordnet_retrieve_data, en_list))
     return output_list
 
+
+def hi():
+    return True
